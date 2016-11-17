@@ -3,6 +3,8 @@ using System.Collections;
 
 public class StateThrow : BaseState
 {
+	private float m_stateTime = 
+
 	public override void Enter(eStates m_priviousState)
 	{
 	}
