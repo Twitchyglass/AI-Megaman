@@ -11,7 +11,7 @@ public class BaseInputHandler : MonoBehaviour
 	}
 
 	// Update is called once per frame
-	public virtual void Cycle()
+	public virtual void Cycle(float deltaTime)
 	{
 
 	}

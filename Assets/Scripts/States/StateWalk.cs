@@ -16,7 +16,7 @@ public class StateWalk : BaseState
 	// Update is called once per frame
 	public override void Cycle(float deltaTime, ref eStates m_currentState)
 	{
-		m_me.addToVelocity(0.0f, -25.0f * deltaTime);
+		m_me.addToVelocity(0.0f, -75.0f * deltaTime);
 	}
 
 	public override void Input(bool[] inputs, ref eStates m_currentState)
@@ -24,6 +24,14 @@ public class StateWalk : BaseState
 		if (inputs[(int)eInputs.DOWN] && inputs[(int)eInputs.ATTACK_1])
 		{
 			m_currentState = eStates.SLIDING;
+		}
+		else if (inputs[(int)eInputs.ATTACK_1])
+		{
+			m_currentState = eStates.ATTACK_1;
+		}
+		else if (inputs[(int)eInputs.ATTACK_2])
+		{
+			m_currentState = eStates.ATTACK_2;
 		}
 		else if (inputs[(int)eInputs.BLOCK])
 		{

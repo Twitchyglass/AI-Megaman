@@ -10,7 +10,7 @@ public class AI_Input : BaseInputHandler
 	}
 
 	// Update is called once per frame
-	public override void Cycle()
+	public override void Cycle(float deltaTime)
 	{
 
 	}
@@ -22,6 +22,7 @@ public class AI_Input : BaseInputHandler
 
 	public override void Inputs(ref bool[] inputs)
 	{
-		inputs[(int)eInputs.RIGHT] = true;
+		//inputs[(int)eInputs.RIGHT] = true;
+		inputs[(int)eInputs.BLOCK] = true;
 	}
 }

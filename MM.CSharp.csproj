@@ -66,20 +66,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\EnviromentCollision.cs" />
-    <Compile Include="Assets\GameManager.cs" />
     <Compile Include="Assets\Scripts\AnimClass.cs" />
     <Compile Include="Assets\Scripts\BaseState.cs" />
+    <Compile Include="Assets\Scripts\CameraManager.cs" />
     <Compile Include="Assets\Scripts\Charicter.cs" />
     <Compile Include="Assets\Scripts\Controler.cs" />
+    <Compile Include="Assets\Scripts\EnviromentCollision.cs" />
+    <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\HitBoxManager.cs" />
+    <Compile Include="Assets\Scripts\PersistantData.cs" />
     <Compile Include="Assets\Scripts\State_Machine.cs" />
+    <Compile Include="Assets\Scripts\States\AttackClasses\BaseAttack.cs" />
+    <Compile Include="Assets\Scripts\States\AttackClasses\BusterAttack.cs" />
+    <Compile Include="Assets\Scripts\States\AttackClasses\SaberAttack.cs" />
+    <Compile Include="Assets\Scripts\States\AttackClasses\ShieldAttack.cs" />
+    <Compile Include="Assets\Scripts\States\AttackClasses\TonfaAttack.cs" />
+    <Compile Include="Assets\Scripts\States\Attacks\Bulett.cs" />
+    <Compile Include="Assets\Scripts\States\Attacks\Projectile.cs" />
+    <Compile Include="Assets\Scripts\States\Attacks\Shield.cs" />
+    <Compile Include="Assets\Scripts\States\Attacks\StateBuster.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateSaber.cs" />
+    <Compile Include="Assets\Scripts\States\Attacks\StateShield.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateShieldAir.cs" />
-    <Compile Include="Assets\Scripts\States\Attacks\StateShieldGround.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateShootAir.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateShootClimb.cs" />
-    <Compile Include="Assets\Scripts\States\Attacks\StateShootGround.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateSlide.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateThrow.cs" />
     <Compile Include="Assets\Scripts\States\Attacks\StateTonfa.cs" />

@@ -27,6 +27,14 @@ public class StateStand : BaseState
 		{
 			m_currentState = eStates.SLIDING;
 		}
+		else if (inputs[(int)eInputs.ATTACK_1])
+		{
+			m_currentState = eStates.ATTACK_1;
+		}
+		else if (inputs[(int)eInputs.ATTACK_2])
+		{
+			m_currentState = eStates.ATTACK_2;
+		}
 		else if (inputs[(int)eInputs.BLOCK])
 		{
 			m_currentState = eStates.BLOCK;

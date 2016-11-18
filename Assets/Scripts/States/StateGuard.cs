@@ -5,10 +5,12 @@ public class StateGuard : BaseState
 {
 	public override void Enter(eStates m_priviousState)
 	{
+		m_me.SetGuarding(true);
 	}
 
 	public override void Exit()
 	{
+		m_me.SetGuarding(false);
 	}
 
 	// Update is called once per frame
@@ -19,17 +21,19 @@ public class StateGuard : BaseState
 
 	public override void Input(bool[] inputs, ref eStates m_currentState)
 	{
-		if (!inputs[(int)eInputs.BLOCK])
+		if (!m_me.IsInStun())
 		{
-			m_currentState = eStates.STANDING;
-		}
-		else if (inputs[(int)eInputs.LEFT])
-		{
-			m_me.setLeft(true);
-		}
-		else if (inputs[(int)eInputs.RIGHT])
-		{
-			m_me.setLeft(false);
+			if (!inputs[(int)eInputs.BLOCK])
+				m_currentState = eStates.STANDING;
+
+			else if (inputs[(int)eInputs.ATTACK_1] || inputs[(int)eInputs.ATTACK_2])
+				m_currentState = eStates.THROW;
+
+			else if (inputs[(int)eInputs.LEFT])
+				m_me.setLeft(true);
+
+			else if (inputs[(int)eInputs.RIGHT])
+				m_me.setLeft(false);
 		}
 	}
 }

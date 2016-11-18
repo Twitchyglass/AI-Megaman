@@ -12,6 +12,13 @@ public enum eStates
 	SLIDING,
 	BLOCK,
 
+	ATTACK_1,
+	ATTACK_2,
+	THROW,
+
+	HIT_STUN,
+	AIR_HIT_STUN,
+
 	SPAWNING,
 	KO_D,
 
@@ -25,25 +32,35 @@ public enum eInputs
 	LEFT,
 	RIGHT,
 
+	BLOCK,
 	JUMP,
 	ATTACK_1,
 	ATTACK_2,
-	BLOCK,
 
 	SIZE_OF_E_INPUTS
+}
+
+public enum eAttackType
+{
+	STRIKE,
+	PROJECTILE,
+	THROW
 }
 
 public class State_Machine : MonoBehaviour
 {
 	public Sprite[] m_sprites;
 	private BaseState[] m_stateClass = new BaseState[(int)(eStates.SIZE_OF_E_STATES)];
-	
+
 	public AnimClass m_animations;
 	private SpriteRenderer m_sprite;
 	Charicter m_me;
 
 	public eStates m_newState;
 	public eStates m_currentState;
+
+	private BaseAttack m_attack1;
+	private BaseAttack m_attack2;
 
 	private bool[] m_inputs = new bool[(int)eInputs.SIZE_OF_E_INPUTS];
 	public BaseInputHandler m_inputHandler;
@@ -54,15 +71,27 @@ public class State_Machine : MonoBehaviour
 		m_me = GetComponent<Charicter>();
 		m_sprite = GetComponent<SpriteRenderer>();
 		m_inputHandler = GetComponent<BaseInputHandler>();
-		m_inputHandler.Initialize(); 
+		m_inputHandler.Initialize();
 
-		 m_stateClass[(int)eStates.STANDING] = GetComponent<StateStand>();
+		m_attack1 = GetComponent<SaberAttack>();
+		//m_attack1 = GetComponent<TonfaAttack>();
+		m_attack2 = GetComponent<ShieldAttack>();
+		//m_attack2 = GetComponent<BusterAttack>();
+
+		m_stateClass[(int)eStates.STANDING] = GetComponent<StateStand>();
 		m_stateClass[(int)eStates.WALKING] = GetComponent<StateWalk>();
 		m_stateClass[(int)eStates.JUMPING] = GetComponent<StateJump>();
 		m_stateClass[(int)eStates.PRE_POST_JUMP] = GetComponent<StatePrePostJump>();
 		m_stateClass[(int)eStates.FALLING] = GetComponent<StateFall>();
 		m_stateClass[(int)eStates.SLIDING] = GetComponent<StateSlide>();
 		m_stateClass[(int)eStates.BLOCK] = GetComponent<StateGuard>();
+		
+		m_stateClass[(int)eStates.ATTACK_1] = m_attack1.InitializeState();
+		m_stateClass[(int)eStates.ATTACK_2] = m_attack2.InitializeState();
+		m_stateClass[(int)eStates.THROW] = GetComponent<StateThrow>();
+
+		m_stateClass[(int)eStates.HIT_STUN] = GetComponent<StateHitGround>();
+		m_stateClass[(int)eStates.AIR_HIT_STUN] = GetComponent<StateHitAir>();
 		m_stateClass[(int)eStates.SPAWNING] = GetComponent<StateSpawn>();
 		m_stateClass[(int)eStates.KO_D] = GetComponent<StateKO>();
 
@@ -71,7 +100,7 @@ public class State_Machine : MonoBehaviour
 
 		m_stateClass[(int)m_newState].Enter(m_currentState);
 
-		for (int z = 0; z < (int) eStates.SIZE_OF_E_STATES; z++)
+		for (int z = 0; z < (int)eStates.SIZE_OF_E_STATES; z++)
 		{
 			m_stateClass[z].Initialize(m_me);
 		}
@@ -110,6 +139,23 @@ public class State_Machine : MonoBehaviour
 		m_animations.addKeyFrame((int)eStates.BLOCK, m_sprites[51], 0.01f);
 		m_animations.animRepeat((int)eStates.BLOCK);
 
+		m_attack1.InitializeAnimation(m_animations, m_sprites, (int)eStates.ATTACK_1);
+		m_attack2.InitializeAnimation(m_animations, m_sprites, (int)eStates.ATTACK_2);
+
+		m_animations.addAnim(); // THROW
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[3], 5.0f/60.0f);
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[27], 8.0f/60.0f);
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[18], 12.0f/60.0f);
+		//m_animations.animRepeat((int)eStates.THROW);
+
+		m_animations.addAnim(); // HIT_STUN
+		m_animations.addKeyFrame((int)eStates.HIT_STUN, m_sprites[20], 0.01f);
+		m_animations.animRepeat((int)eStates.HIT_STUN);
+
+		m_animations.addAnim(); // AIR_HIT_STUN
+		m_animations.addKeyFrame((int)eStates.AIR_HIT_STUN, m_sprites[21], 0.01f);
+		m_animations.animRepeat((int)eStates.AIR_HIT_STUN);
+
 		m_animations.addAnim(); // SPAWNING
 		m_animations.addKeyFrame((int)eStates.SPAWNING, m_sprites[0], 0.2f);
 		m_animations.addKeyFrame((int)eStates.SPAWNING, m_sprites[0], 0.2f);
@@ -117,6 +163,10 @@ public class State_Machine : MonoBehaviour
 		m_animations.addKeyFrame((int)eStates.SPAWNING, m_sprites[11], 0.2f);
 		m_animations.addKeyFrame((int)eStates.SPAWNING, m_sprites[1], 0.2f);
 		m_animations.addKeyFrame((int)eStates.SPAWNING, m_sprites[2], 0.25f);
+
+		m_animations.addAnim(); // KO_D
+		m_animations.addKeyFrame((int)eStates.KO_D, m_sprites[28], 0.01f);
+		m_animations.animRepeat((int)eStates.KO_D);
 
 		m_animations.F_play();
 
@@ -129,6 +179,7 @@ public class State_Machine : MonoBehaviour
 	{
 		ResetInputs();
 		m_inputHandler.Inputs(ref m_inputs);
+		m_inputHandler.Cycle(deltaTime);
 
 		m_stateClass[(int)m_newState].Input(m_inputs, ref m_newState);
 		StateCheck();
@@ -154,12 +205,31 @@ public class State_Machine : MonoBehaviour
 
 	void StateCheck()
 	{
-		if (m_newState != m_currentState)
+		if (m_me.WasHit())
 		{
+			Debug.Log("Hit detected");
+
+			m_me.ResetWasHit();
+
+			if (m_me.IsLaunched())
+				m_newState = eStates.AIR_HIT_STUN;
+			else
+				m_newState = eStates.HIT_STUN;
+
 			m_stateClass[(int)m_currentState].Exit();
 			m_stateClass[(int)m_newState].Enter(m_currentState);
 
 			m_currentState = m_newState;
+		}
+		else
+		{
+			if (m_newState != m_currentState)
+			{
+				m_stateClass[(int)m_currentState].Exit();
+				m_stateClass[(int)m_newState].Enter(m_currentState);
+
+				m_currentState = m_newState;
+			}
 		}
 	}
 
@@ -175,6 +245,12 @@ public class State_Machine : MonoBehaviour
 	{
 		m_stateClass[(int)m_newState].CollideHorizontal(ref m_newState);
 		m_me.colideHorizontal();
+	}
+
+	public void colideHorizontal(float velocity)
+	{
+		m_stateClass[(int)m_newState].CollideHorizontal(ref m_newState);
+		m_me.colideHorizontal(velocity);
 	}
 
 	public void collideVertical(float top)
