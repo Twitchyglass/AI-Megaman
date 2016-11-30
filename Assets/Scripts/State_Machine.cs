@@ -65,7 +65,9 @@ public class State_Machine : MonoBehaviour
 	private bool[] m_inputs = new bool[(int)eInputs.SIZE_OF_E_INPUTS];
 	public BaseInputHandler m_inputHandler;
 
-	// Use this for initialization
+	private eWeaponType m_weaponType1 = eWeaponType.NONE;
+	private eWeaponType m_weaponType2 = eWeaponType.NONE;
+	
 	public void Initialize()
 	{
 		m_me = GetComponent<Charicter>();
@@ -73,10 +75,12 @@ public class State_Machine : MonoBehaviour
 		m_inputHandler = GetComponent<BaseInputHandler>();
 		m_inputHandler.Initialize();
 
-		m_attack1 = GetComponent<SaberAttack>();
+		//m_attack1 = GetComponent<SaberAttack>();
 		//m_attack1 = GetComponent<TonfaAttack>();
-		m_attack2 = GetComponent<ShieldAttack>();
+		//m_attack2 = GetComponent<ShieldAttack>();
 		//m_attack2 = GetComponent<BusterAttack>();
+
+		BuildWeapons();
 
 		m_stateClass[(int)eStates.STANDING] = GetComponent<StateStand>();
 		m_stateClass[(int)eStates.WALKING] = GetComponent<StateWalk>();
@@ -85,7 +89,7 @@ public class State_Machine : MonoBehaviour
 		m_stateClass[(int)eStates.FALLING] = GetComponent<StateFall>();
 		m_stateClass[(int)eStates.SLIDING] = GetComponent<StateSlide>();
 		m_stateClass[(int)eStates.BLOCK] = GetComponent<StateGuard>();
-		
+
 		m_stateClass[(int)eStates.ATTACK_1] = m_attack1.InitializeState();
 		m_stateClass[(int)eStates.ATTACK_2] = m_attack2.InitializeState();
 		m_stateClass[(int)eStates.THROW] = GetComponent<StateThrow>();
@@ -143,9 +147,9 @@ public class State_Machine : MonoBehaviour
 		m_attack2.InitializeAnimation(m_animations, m_sprites, (int)eStates.ATTACK_2);
 
 		m_animations.addAnim(); // THROW
-		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[3], 5.0f/60.0f);
-		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[27], 8.0f/60.0f);
-		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[18], 12.0f/60.0f);
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[3], 5.0f / 60.0f);
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[27], 8.0f / 60.0f);
+		m_animations.addKeyFrame((int)eStates.THROW, m_sprites[18], 12.0f / 60.0f);
 		//m_animations.animRepeat((int)eStates.THROW);
 
 		m_animations.addAnim(); // HIT_STUN
@@ -173,13 +177,12 @@ public class State_Machine : MonoBehaviour
 		ResetInputs();
 		m_me.Initialize(m_sprite);
 	}
-
-	// Update is called once per frame
+	
 	public void Cycle(float deltaTime)
 	{
 		ResetInputs();
+		m_inputHandler.Cycle(deltaTime, m_newState);
 		m_inputHandler.Inputs(ref m_inputs);
-		m_inputHandler.Cycle(deltaTime);
 
 		m_stateClass[(int)m_newState].Input(m_inputs, ref m_newState);
 		StateCheck();
@@ -198,6 +201,60 @@ public class State_Machine : MonoBehaviour
 		}*/
 	}
 
+	public void GiveInputHandlerStatus(Charicter opponent, Charicter me, float deltaTime)
+	{
+		m_inputHandler.ReceveStatus(opponent, me, deltaTime);
+	}
+
+	public void AssignWeapons(eWeaponType weapon1, eWeaponType weapon2)
+	{
+		m_weaponType1 = weapon1;
+		m_weaponType2 = weapon2;
+	}
+
+	private void BuildWeapons()
+	{
+		bool weapon1NotAssigned = (m_weaponType1 == eWeaponType.NONE);
+		bool weapon2NotAssigned = (m_weaponType2 == eWeaponType.NONE);
+
+		do
+		{
+			if (weapon1NotAssigned)
+			{
+				m_weaponType1 = (eWeaponType)Random.Range(0, 3);
+			}
+
+			if (weapon2NotAssigned)
+			{
+				m_weaponType2 = (eWeaponType)Random.Range(0, 3);
+			}
+		} while (m_weaponType1 == m_weaponType2);
+
+		if (m_weaponType1 == eWeaponType.BUSTER)
+			m_attack1 = GetComponent<BusterAttack>();
+
+		else if (m_weaponType1 == eWeaponType.SABER)
+			m_attack1 = GetComponent<SaberAttack>();
+
+		else if (m_weaponType1 == eWeaponType.SHIELD)
+			m_attack1 = GetComponent<ShieldAttack>();
+
+		else if (m_weaponType1 == eWeaponType.TONFA)
+			m_attack1 = GetComponent<TonfaAttack>();
+
+		if (m_weaponType2 == eWeaponType.BUSTER)
+			m_attack2 = GetComponent<BusterAttack>();
+
+		else if (m_weaponType2 == eWeaponType.SABER)
+			m_attack2 = GetComponent<SaberAttack>();
+
+		else if (m_weaponType2 == eWeaponType.SHIELD)
+			m_attack2 = GetComponent<ShieldAttack>();
+
+		else if (m_weaponType2 == eWeaponType.TONFA)
+			m_attack2 = GetComponent<TonfaAttack>();
+	}
+
 	public void Physics(float deltaTime)
 	{
 		m_me.Physics(deltaTime);
@@ -211,10 +268,12 @@ public class State_Machine : MonoBehaviour
 
 			m_me.ResetWasHit();
 
-			if (m_me.IsLaunched())
+			/*if (m_me.IsLaunched())
 				m_newState = eStates.AIR_HIT_STUN;
 			else
-				m_newState = eStates.HIT_STUN;
+				m_newState = eStates.HIT_STUN;*/
+
+			m_newState = eStates.AIR_HIT_STUN;
 
 			m_stateClass[(int)m_currentState].Exit();
 			m_stateClass[(int)m_newState].Enter(m_currentState);
